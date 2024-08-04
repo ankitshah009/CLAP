@@ -213,11 +213,24 @@ class CLAPWrapper():
 
         raise TypeError(self.default_collate_err_msg_format.format(elem_type))
     
+    #def read_audio(self, audio_path, resample=True):
+    #    r"""Loads audio file or array and returns a torch tensor"""
+    #    # Randomly sample a segment of audio_duration from the clip or pad to match duration
+    #    audio_time_series, sample_rate = torchaudio.load(audio_path)
+    #    
+    #    resample_rate = self.args.sampling_rate
+    #    if resample and resample_rate != sample_rate:
+    #        resampler = T.Resample(sample_rate, resample_rate)
+    #        audio_time_series = resampler(audio_time_series)
+    #    return audio_time_series, resample_rate
     def read_audio(self, audio_path, resample=True):
         r"""Loads audio file or array and returns a torch tensor"""
         # Randomly sample a segment of audio_duration from the clip or pad to match duration
-        audio_time_series, sample_rate = torchaudio.load(audio_path)
-        
+        # audio_time_series, sample_rate = torchaudio.load(audio_path)
+        # print(audio_path.shape)
+        audio_time_series = audio_path
+        # print(audio_time_series.shape)
+        sample_rate=32000
         resample_rate = self.args.sampling_rate
         if resample and resample_rate != sample_rate:
             resampler = T.Resample(sample_rate, resample_rate)
@@ -248,15 +261,26 @@ class CLAPWrapper():
                                                   audio_duration*sample_rate]
         return torch.FloatTensor(audio_time_series)
 
+    #def preprocess_audio(self, audio_files, resample):
+    #    r"""Load list of audio files and return raw audio"""
+    #    audio_tensors = []
+    #    for audio_file in audio_files:
+    #        audio_tensor = self.load_audio_into_tensor(
+    #            audio_file, self.args.duration, resample)
+    #        audio_tensor = audio_tensor.reshape(
+    #            1, -1).cuda() if self.use_cuda and torch.cuda.is_available() else audio_tensor.reshape(1, -1)
+    #        audio_tensors.append(audio_tensor)
+    #    return self.default_collate(audio_tensors)
+
     def preprocess_audio(self, audio_files, resample):
         r"""Load list of audio files and return raw audio"""
         audio_tensors = []
-        for audio_file in audio_files:
-            audio_tensor = self.load_audio_into_tensor(
-                audio_file, self.args.duration, resample)
-            audio_tensor = audio_tensor.reshape(
-                1, -1).cuda() if self.use_cuda and torch.cuda.is_available() else audio_tensor.reshape(1, -1)
-            audio_tensors.append(audio_tensor)
+        # for audio_file in audio_files:
+        audio_tensor = self.load_audio_into_tensor(
+            audio_files, self.args.duration, resample)
+        audio_tensor = audio_tensor.reshape(
+            1, -1).cuda() if self.use_cuda and torch.cuda.is_available() else audio_tensor.reshape(1, -1)
+        audio_tensors.append(audio_tensor)
         return self.default_collate(audio_tensors)
 
     def preprocess_text(self, text_queries):
